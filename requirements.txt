@@ -1,0 +1,24 @@
+# Core ML & Data
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+
+# Data Validation & Versioning
+dvc
+great-expectations
+pydantic
+
+# Experiment Tracking & Explainability
+mlflow
+shap
+
+# API & Server
+fastapi
+uvicorn
+
+# Testing & Utilities
+pytest
+python-dotenv
+pyyaml
