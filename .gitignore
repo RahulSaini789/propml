@@ -1,0 +1,29 @@
+# 🐘 Massive Datasets (The Heavyweights)
+*.csv
+*.parquet
+*.h5
+
+# 🧠 Trained Models (The Big Brains)
+*.pkl
+*.joblib
+
+# 🗑️ Python Junk (The Clutter)
+__pycache__/
+*.pyc
+
+# 📦 Virtual Environments (The Developer's Toolbox)
+venv/
+.venv/
+env/
+
+# 🗝️ Secret Keys (The Vault Passwords)
+.env
+
+# 📓 Jupyter Notebook Checkpoints (The Rough Drafts)
+.ipynb_checkpoints/
+
+# MLflow local runs (tracked by MLflow, not Git)
+mlruns/
+
+# DVC cache (tracked by DVC, not Git)
+.dvc/cache
