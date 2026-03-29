@@ -1,0 +1,10 @@
+{
+  "mape": 20.5824,
+  "r2": 0.8582,
+  "rmse_log": 0.2005,
+  "median_error_cr": 0.1586,
+  "run_id": "6833f0b4b9ec4630a666580184b3d47a",
+  "n_features": 26,
+  "n_train_rows": 3417,
+  "improvement_over_baseline": 13.8665
+}
