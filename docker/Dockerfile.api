@@ -1,0 +1,46 @@
+# ════════════════════════════════════════════════════
+#  PropML — Production Dockerfile (Multi-Stage)
+#  docker/Dockerfile.api
+# ════════════════════════════════════════════════════
+
+# ── STAGE 1: Builder ────────────────────────────────
+FROM python:3.11-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libgomp1 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# 🛠️ THE FIX: Use a Virtual Environment instead of --user
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── STAGE 2: Production ─────────────────────────────
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 🛠️ THE FIX: Copy the venv from builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Make sure Python uses the venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy all required project files
+COPY configs/ ./configs/
+COPY data/features/ ./data/features/
+COPY models/current/ ./models/current/
+COPY src/serving/ ./src/serving/
+
+# Create a non-root user for security
+RUN useradd --create-home --shell /bin/bash --uid 1000 propml
+RUN chown -R propml:propml /app
+
+# Switch to the secure non-root user
+USER propml

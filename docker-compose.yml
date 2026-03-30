@@ -1,0 +1,131 @@
+# ════════════════════════════════════════════════════
+#  PropML — Docker Compose Full Stack
+#  docker-compose.yml
+#
+#  Start: docker-compose up --build
+#  Stop:  docker-compose down
+#
+#  Services:
+#    postgres   → :5432  (MLflow backend database)
+#    mlflow     → :5000  (Experiment tracking UI)
+#    api        → :8000  (FastAPI prediction server)
+#    grafana    → :3001  (Monitoring dashboard)
+#
+#  Access:
+#    API Docs   → http://localhost:8000/docs
+#    MLflow     → http://localhost:5000
+#    Grafana    → http://localhost:3001 (admin/admin)
+# ════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+
+  # ── PostgreSQL ────────────────────────────────────
+  # Stores MLflow experiment metadata, runs, metrics
+  postgres:
+    image: postgres:16-alpine
+    container_name: propml-postgres
+    environment:
+      POSTGRES_DB:       propml
+      POSTGRES_USER:     propml
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-propml_dev_123}
+    volumes:
+      # Named volume: data persists between container restarts
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"   # Expose for local psql access (dev only)
+    healthcheck:
+      test: [CMD, pg_isready, -U, propml]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ── MLflow Tracking Server ────────────────────────
+  # Experiment tracking + model registry
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.11.0
+    container_name: propml-mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      # Backend: postgres for metadata (runs, params, metrics)
+      MLFLOW_BACKEND_STORE_URI: >
+        postgresql://propml:${DB_PASSWORD:-propml_dev_123}@postgres:5432/propml
+    # 🛠️ FIX 1: Install psycopg2-binary adapter before starting the server
+    entrypoint: /bin/sh
+    command: >
+      -c "pip install psycopg2-binary && 
+      mlflow server 
+      --host 0.0.0.0 
+      --port 5000 
+      --backend-store-uri postgresql://propml:${DB_PASSWORD:-propml_dev_123}@postgres:5432/propml 
+      --default-artifact-root /mlflow-artifacts 
+      --serve-artifacts"
+    volumes:
+      - mlflow_artifacts:/mlflow-artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy   # Wait for postgres to be ready
+    restart: unless-stopped
+
+  # ── FastAPI Serving ───────────────────────────────
+  # ML model serving endpoint
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: propml-api
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      DATABASE_URL: >
+        postgresql://propml:${DB_PASSWORD:-propml_dev_123}@postgres:5432/propml
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      # Read-only mounts: container reads but cannot write
+      # Security + immutability: models treated as artifacts
+      - ./data/features:/app/data/features:ro
+      - ./models/current:/app/models/current:ro
+    # 🛠️ FIX 2: Bypass direct binary permission by running uvicorn as a Python module
+    command: ["python", "-m", "uvicorn", "src.serving.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s   # Model loading takes ~30-40s
+      retries: 3
+    restart: unless-stopped
+
+  # ── Grafana ───────────────────────────────────────
+  # Monitoring dashboard for API metrics + drift
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: propml-grafana
+    ports:
+      - "3001:3000"   # 3001 to avoid conflict with React dev server
+    environment:
+      GF_SECURITY_ADMIN_USER:     admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP:     "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
+# ── Named Volumes ─────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  mlflow_artifacts:
+    driver: local
+  grafana_data:
+    driver: local

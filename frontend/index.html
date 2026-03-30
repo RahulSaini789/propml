@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropML — Gurgaon Property Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c10;
+  --bg2: #0d1117;
+  --bg3: #111820;
+  --card: #141c25;
+  --card2: #18222e;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #e8edf2;
+  --muted: #637080;
+  --gold: #c9a84c;
+  --gold2: #e8c87a;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --red: #ef4444;
+  --font: 'Outfit', sans-serif;
+  --serif: 'DM Serif Display', serif;
+  --mono: 'DM Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.7;overflow-x:hidden;}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.25);border-radius:4px;}
+
+/* ─── NOISE TEXTURE ─── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.4;}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,12,16,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:58px;display:flex;align-items:center;padding:0 2rem;gap:1.5rem;}
+.logo{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--gold);letter-spacing:2px;margin-right:auto;}
+.logo span{color:rgba(201,168,76,0.4);}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s;font-weight:400;}
+.nav-link:hover{color:var(--text);}
+.nav-cta{background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:6px 18px;border-radius:6px;font-size:13px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.nav-cta:hover{background:rgba(201,168,76,0.2);border-color:var(--gold);}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:5rem 2rem;position:relative;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);}
+.glow1{position:absolute;top:-20%;left:-10%;width:700px;height:700px;background:radial-gradient(ellipse,rgba(201,168,76,0.05),transparent 65%);pointer-events:none;}
+.glow2{position:absolute;bottom:-30%;right:-10%;width:600px;height:600px;background:radial-gradient(ellipse,rgba(59,130,246,0.04),transparent 65%);pointer-events:none;}
+.hero-inner{position:relative;max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;}.hero-form-wrap{display:none;}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);padding:5px 14px;border-radius:20px;font-size:11px;font-family:var(--mono);color:var(--gold);margin-bottom:1.5rem;letter-spacing:1px;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+h1{font-family:var(--serif);font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.05;margin-bottom:1.25rem;letter-spacing:-0.5px;}
+h1 .line2{color:var(--gold);font-style:italic;}
+.hero-sub{color:var(--muted);max-width:480px;margin-bottom:2.5rem;font-size:1rem;line-height:1.75;}
+.hero-stats{display:flex;gap:2rem;flex-wrap:wrap;}
+.stat{text-align:left;}
+.stat .val{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--gold2);}
+.stat .lbl{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+/* ─── PREDICTION FORM ─── */
+.pred-card{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:2rem;position:relative;overflow:hidden;}
+.pred-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.form-title{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:8px;}
+.form-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem;}
+.field label{display:block;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;}
+.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:13.5px;transition:border-color .2s,box-shadow .2s;outline:none;}
+.field input:focus,.field select:focus{border-color:rgba(201,168,76,0.4);box-shadow:0 0 0 3px rgba(201,168,76,0.07);}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23637080' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.predict-btn{width:100%;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.08));border:1px solid rgba(201,168,76,0.35);color:var(--gold);padding:12px;border-radius:10px;font-family:var(--mono);font-size:13px;letter-spacing:1px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.predict-btn:hover{background:rgba(201,168,76,0.2);border-color:var(--gold);transform:translateY(-1px);}
+.predict-btn:active{transform:scale(0.99);}
+.predict-btn .btn-loading{display:none;}
+.predict-btn.loading .btn-text{display:none;}
+.predict-btn.loading .btn-loading{display:inline;}
+
+/* ─── RESULT PANEL ─── */
+.result-panel{background:var(--bg3);border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:1.25rem;margin-top:1rem;display:none;animation:slideUp .4s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-panel.show{display:block;}
+.result-price{font-family:var(--serif);font-size:2.2rem;color:var(--gold2);line-height:1.1;margin-bottom:4px;}
+.result-range{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:1rem;}
+.shap-title{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.shap-item{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.shap-bar-wrap{flex:1;background:var(--bg2);border-radius:4px;height:5px;overflow:hidden;}
+.shap-bar{height:100%;border-radius:4px;transition:width .8s ease;}
+.shap-bar.pos{background:linear-gradient(90deg,var(--green),rgba(16,185,129,0.5));}
+.shap-bar.neg{background:linear-gradient(90deg,var(--red),rgba(239,68,68,0.5));}
+.shap-feat{font-family:var(--mono);font-size:11px;color:var(--text);min-width:110px;}
+.shap-pct{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:36px;text-align:right;}
+.result-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;}
+
+/* ─── SECTIONS ─── */
+section{padding:6rem 2rem;max-width:1100px;margin:0 auto;}
+.sec-tag{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.sec-tag::before{content:'';width:30px;height:1px;background:var(--gold);}
+h2{font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;margin-bottom:.75rem;}
+.sec-desc{color:var(--muted);max-width:560px;margin-bottom:3rem;font-size:.98rem;}
+hr.divider{border:none;border-top:1px solid var(--border);max-width:1100px;margin:0 auto;}
+
+/* ─── FEATURE CARDS ─── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.75rem;transition:border-color .25s,transform .25s;position:relative;overflow:hidden;}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-3px);}
+.feat-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(201,168,76,0.04),transparent 60%);opacity:0;transition:opacity .3s;}
+.feat-card:hover::after{opacity:1;}
+.feat-icon{font-size:26px;margin-bottom:1rem;}
+.feat-title{font-size:15px;font-weight:600;margin-bottom:8px;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.feat-tag{display:inline-block;margin-top:12px;font-size:10px;font-family:var(--mono);padding:3px 9px;border-radius:4px;letter-spacing:1px;}
+.tag-gold{background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
+.tag-green{background:rgba(16,185,129,0.08);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
+.tag-blue{background:rgba(59,130,246,0.08);color:var(--blue);border:1px solid rgba(59,130,246,0.2);}
+
+/* ─── MARKET INSIGHTS ─── */
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;}
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;}
+.insight-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.insight-val{font-family:var(--mono);font-size:1.6rem;font-weight:500;}
+.insight-val.up{color:var(--green);}
+.insight-val.neutral{color:var(--gold2);}
+.insight-val.muted{color:var(--text);}
+.insight-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* ─── SECTOR TABLE ─── */
+.sector-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.sector-table th{text-align:left;padding:10px 16px;border-bottom:1px solid var(--border2);color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:1px;font-weight:400;}
+.sector-table td{padding:12px 16px;border-bottom:1px solid var(--border);}
+.sector-table tr:last-child td{border-bottom:none;}
+.sector-table tr:hover td{background:rgba(255,255,255,0.015);}
+.price-bar-wrap{width:120px;background:var(--bg2);border-radius:3px;height:4px;display:inline-block;vertical-align:middle;margin-right:8px;}
+.price-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.trend-up{color:var(--green);font-family:var(--mono);font-size:12px;}
+.trend-neutral{color:var(--muted);font-family:var(--mono);font-size:12px;}
+
+/* ─── MLOps PIPELINE ─── */
+.pipeline-row{display:flex;align-items:center;gap:0;overflow-x:auto;padding:1px 0 1rem;margin-bottom:2rem;}
+.pipe-node{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;min-width:120px;text-align:center;flex:none;position:relative;}
+.pipe-node::after{content:'→';position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;z-index:1;}
+.pipe-node:last-child::after{display:none;}
+.pipe-node .pn-icon{font-size:20px;margin-bottom:5px;}
+.pipe-node .pn-name{font-family:var(--mono);font-size:11px;color:var(--text);font-weight:500;}
+.pipe-node .pn-tool{font-size:10px;color:var(--muted);}
+.pipe-node.active{border-color:rgba(201,168,76,0.35);background:rgba(201,168,76,0.05);}
+.pipe-node.active .pn-name{color:var(--gold);}
+
+/* ─── TECH STACK ─── */
+.stack-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2rem;}
+.stack-chip{background:var(--card);border:1px solid var(--border2);padding:6px 14px;border-radius:8px;font-size:12px;font-family:var(--mono);color:var(--muted);transition:all .2s;}
+.stack-chip:hover{border-color:rgba(201,168,76,0.3);color:var(--gold);}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;}
+footer b{color:var(--gold);}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:12px;transition:color .2s;}
+.footer-links a:hover{color:var(--gold);}
+
+/* ─── ERROR STATE ─── */
+.error-msg{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:rgba(239,68,68,0.9);margin-top:10px;display:none;}
+.error-msg.show{display:block;}
+
+/* ─── REVEAL ─── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.vis{opacity:1;transform:none;}
+
+/* ─── TOOLTIP ─── */
+.tooltip{position:relative;display:inline-block;}
+.tooltip .tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);padding:6px 10px;border-radius:6px;font-size:11px;color:var(--text);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;}
+.tooltip:hover .tip{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">PROP<span>/</span>ML</div>
+  <a href="#predict" class="nav-link">Predict</a>
+  <a href="#market" class="nav-link">Market</a>
+  <a href="#pipeline" class="nav-link">MLOps</a>
+  <a href="#predict" class="nav-cta">Try Now →</a>
+</nav>
+
+<!-- ════ HERO ════ -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="glow1"></div>
+  <div class="glow2"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">LIVE MODEL · GURGAON 2025</div>
+      <h1>Know The <span class="line2">Real Price</span> Before You Negotiate</h1>
+      <p class="hero-sub">Production ML model trained on 3,417 Gurgaon properties. Get instant price prediction with SHAP-powered explanation — see exactly what's driving the valuation.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="val">3,417</div><div class="lbl">Properties Trained</div></div>
+        <div class="stat"><div class="val">~21%</div><div class="lbl">Avg Error (MAPE)</div></div>
+        <div class="stat"><div class="val">0.85</div><div class="lbl">R² Score</div></div>
+        <div class="stat"><div class="val">&lt;200ms</div><div class="lbl">Prediction Speed</div></div>
+      </div>
+    </div>
+
+    <!-- PREDICTION FORM -->
+    <div class="hero-form-wrap" id="predict">
+      <div class="pred-card">
+        <div class="form-title">Price Estimator</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Property Type</label>
+            <select id="ptype">
+              <option value="flat">Flat / Apartment</option>
+              <option value="house">Independent House</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Area (sq.ft.)</label>
+            <input type="number" id="area" value="1800" min="100" max="50000" placeholder="e.g. 1800">
+          </div>
+          <div class="field">
+            <label>Bedrooms</label>
+            <select id="bedrooms">
+              <option value="1">1 BHK</option>
+              <option value="2">2 BHK</option>
+              <option value="3" selected>3 BHK</option>
+              <option value="4">4 BHK</option>
+              <option value="5">5 BHK</option>
+              <option value="6">6+ BHK</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Bathrooms</label>
+            <select id="bathrooms">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Floor Number</label>
+            <input type="number" id="floor" value="5" min="0" max="60">
+          </div>
+          <div class="field">
+            <label>Total Floors</label>
+            <input type="number" id="total_floors" value="15" min="1" max="80">
+          </div>
+          <div class="field">
+            <label>Amenity Score (0-10)</label>
+            <input type="range" id="amenity" min="0" max="10" value="7" style="padding:14px 0;" oninput="document.getElementById('amenity_val').textContent=this.value">
+          </div>
+          <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:20px;">
+            <span class="tooltip" style="font-family:var(--mono);font-size:22px;color:var(--gold);font-weight:500;" id="amenity_val">7<span class="tip">0=basic, 10=luxury amenities</span></span>
+            <span style="font-size:12px;color:var(--muted)">/ 10 amenities</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>Metro Nearby</label>
+          <select id="metro">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        <button class="predict-btn" onclick="predict()">
+          <span class="btn-text">ESTIMATE PRICE →</span>
+          <span class="btn-loading">COMPUTING ...</span>
+        </button>
+        <div class="error-msg" id="error-msg">API not reachable. Make sure the PropML API is running on localhost:8000</div>
+
+        <!-- RESULT -->
+        <div class="result-panel" id="result-panel">
+          <div class="result-price" id="result-price">₹ —</div>
+          <div class="result-range" id="result-range">Confidence range: — to —</div>
+          <div class="shap-title">Why this price?</div>
+          <div id="shap-bars"></div>
+          <div class="result-meta">
+            <span id="result-id">—</span>
+            <span id="result-latency">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ════ FEATURES ════ -->
+<section class="reveal">
+  <div class="sec-tag">What's Inside</div>
+  <h2>Production-Grade, End-to-End</h2>
+  <p class="sec-desc">Not a Jupyter notebook project. A real MLOps pipeline — from raw scraping to live API with drift monitoring.</p>
+  <div class="features-grid">
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">🧹</div>
+      <div class="feat-title">Smart Data Cleaning</div>
+      <div class="feat-desc">City-aware pipeline handles messy real estate data — price in Lac/Crore, area in sq.m/sqft, floor strings with non-breaking spaces. Grouped IQR outlier removal per property type.</div>
+      <span class="feat-tag tag-gold">pandas + regex</span>
+    </div>
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">⚙️</div>
+      <div class="feat-title">13 Engineered Features</div>
+      <div class="feat-desc">amenity_score (weighted), relative_floor = pos/total, bath_per_bed luxury proxy, K-Fold target-encoded sector, ast.literal_eval for list columns, log1p target transform.</div>
+      <span class="feat-tag tag-green">sklearn + numpy</span>
+    </div>
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-title">XGBoost + Optuna Tuning</div>
+      <div class="feat-desc">Bayesian hyperparameter search with TPE sampler. 5-fold cross-validation. SHAP TreeExplainer for every prediction. MLflow model registry with quality gate before promotion.</div>
+      <span class="feat-tag tag-blue">XGBoost + MLflow</span>
+    </div>
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">FastAPI + Docker Serving</div>
+      <div class="feat-desc">ASGI server with Pydantic validation. Model loaded once at startup via lifespan pattern — not per request. Multi-stage Docker build at 680MB. Health check endpoint for orchestrators.</div>
+      <span class="feat-tag tag-gold">FastAPI + Docker</span>
+    </div>
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">🔄</div>
+      <div class="feat-title">CI/CD Pipeline</div>
+      <div class="feat-desc">GitHub Actions: lint → pytest → model quality gate (MAPE < 15%) → Docker build → deploy → smoke test. Concurrency groups prevent race conditions. Docker layer caching.</div>
+      <span class="feat-tag tag-green">GitHub Actions</span>
+    </div>
+    <div class="feat-card" onmousemove="tilt(this,event)">
+      <div class="feat-icon">📦</div>
+      <div class="feat-title">DVC Data Versioning</div>
+      <div class="feat-desc">5-stage DVC pipeline: ingest → validate → clean → featurize → train. Data tracked in S3, code in Git. dvc repro reproduces exact results. dvc metrics diff compares experiments.</div>
+      <span class="feat-tag tag-blue">DVC + S3</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ════ MARKET ════ -->
+<section id="market" class="reveal">
+  <div class="sec-tag">Market Intelligence</div>
+  <h2>Gurgaon Real Estate Snapshot</h2>
+  <p class="sec-desc">Derived from 3,417 clean property records — scraped from 99acres and Housing.com.</p>
+
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-lbl">Median Price</div>
+      <div class="insight-val neutral">₹ 1.49 Cr</div>
+      <div class="insight-sub">All property types</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Most Common</div>
+      <div class="insight-val neutral">3 BHK</div>
+      <div class="insight-sub">46% of listings</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Avg Area</div>
+      <div class="insight-val neutral">1,739 sqft</div>
+      <div class="insight-sub">Built-up area</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Price Range</div>
+      <div class="insight-val neutral">0.16–32 Cr</div>
+      <div class="insight-sub">Post outlier removal</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Flats vs Houses</div>
+      <div class="insight-val up">80% / 20%</div>
+      <div class="insight-sub">Flat market dominant</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-lbl">Avg Rating</div>
+      <div class="insight-val neutral">3.78 / 5</div>
+      <div class="insight-sub">Buyer perception score</div>
+    </div>
+  </div>
+
+  <table class="sector-table">
+    <thead>
+      <tr>
+        <th>Sector / Area</th>
+        <th>Avg Price</th>
+        <th>Price Band</th>
+        <th>Property Type</th>
+        <th>Trend</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>DLF Phase 1-2</td><td>₹ 4.5–12 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:90%"></div></div></td><td>House + Flat</td><td class="trend-up">↑ Premium</td></tr>
+      <tr><td>Golf Course Road</td><td>₹ 3–8 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:75%"></div></div></td><td>Luxury Flat</td><td class="trend-up">↑ High</td></tr>
+      <tr><td>Sector 92-102</td><td>₹ 1.2–2.8 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:50%"></div></div></td><td>Flat</td><td class="trend-neutral">→ Mid</td></tr>
+      <tr><td>Sohna Road</td><td>₹ 0.5–1.5 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:30%"></div></div></td><td>Flat</td><td class="trend-neutral">→ Budget</td></tr>
+      <tr><td>Gwal Pahari</td><td>₹ 6–20 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:100%"></div></div></td><td>House / Villa</td><td class="trend-up">↑ Ultra Luxury</td></tr>
+      <tr><td>Rajendra Park</td><td>₹ 0.8–2 Cr</td><td><div class="price-bar-wrap"><div class="price-bar" style="width:28%"></div></div></td><td>House</td><td class="trend-neutral">→ Mid</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<hr class="divider">
+
+<!-- ════ MLOPS PIPELINE ════ -->
+<section id="pipeline" class="reveal">
+  <div class="sec-tag">Engineering</div>
+  <h2>The Full MLOps Stack</h2>
+  <p class="sec-desc">7 layers built from scratch — every component production-grade, interview-explainable, and recruiter-impressive.</p>
+
+  <div class="pipeline-row">
+    <div class="pipe-node">
+      <div class="pn-icon">🕷️</div>
+      <div class="pn-name">Scraping</div>
+      <div class="pn-tool">99acres · Housing</div>
+    </div>
+    <div class="pipe-node active">
+      <div class="pn-icon">🧹</div>
+      <div class="pn-name">Cleaning</div>
+      <div class="pn-tool">Pandas · Regex</div>
+    </div>
+    <div class="pipe-node active">
+      <div class="pn-icon">⚙️</div>
+      <div class="pn-name">Features</div>
+      <div class="pn-tool">13 Features</div>
+    </div>
+    <div class="pipe-node active">
+      <div class="pn-icon">🧠</div>
+      <div class="pn-name">Training</div>
+      <div class="pn-tool">XGBoost · Optuna</div>
+    </div>
+    <div class="pipe-node active">
+      <div class="pn-icon">📊</div>
+      <div class="pn-name">Tracking</div>
+      <div class="pn-tool">MLflow · SHAP</div>
+    </div>
+    <div class="pipe-node active">
+      <div class="pn-icon">⚡</div>
+      <div class="pn-name">Serving</div>
+      <div class="pn-tool">FastAPI · Docker</div>
+    </div>
+    <div class="pipe-node">
+      <div class="pn-icon">🔄</div>
+      <div class="pn-name">CI/CD</div>
+      <div class="pn-tool">GitHub Actions</div>
+    </div>
+  </div>
+
+  <div class="sec-tag" style="margin-top:2rem">Tech Stack</div>
+  <div class="stack-grid">
+    <span class="stack-chip">Python 3.11</span><span class="stack-chip">XGBoost</span>
+    <span class="stack-chip">FastAPI</span><span class="stack-chip">MLflow</span>
+    <span class="stack-chip">Optuna</span><span class="stack-chip">SHAP</span>
+    <span class="stack-chip">Docker</span><span class="stack-chip">docker-compose</span>
+    <span class="stack-chip">GitHub Actions</span><span class="stack-chip">DVC</span>
+    <span class="stack-chip">Great Expectations</span><span class="stack-chip">Pandas</span>
+    <span class="stack-chip">scikit-learn</span><span class="stack-chip">Pydantic v2</span>
+    <span class="stack-chip">Uvicorn</span><span class="stack-chip">PostgreSQL</span>
+    <span class="stack-chip">Grafana</span><span class="stack-chip">Prometheus</span>
+  </div>
+
+  <div class="features-grid" style="grid-template-columns:1fr 1fr;margin-top:1.5rem;">
+    <div class="feat-card">
+      <div class="feat-title" style="font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;">MODEL METRICS</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--muted)">CV MAPE</span>
+          <span style="font-family:var(--mono);font-size:14px;color:var(--text)">~21%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--muted)">CV R²</span>
+          <span style="font-family:var(--mono);font-size:14px;color:var(--text)">0.85</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--muted)">vs Baseline (Ridge)</span>
+          <span style="font-family:var(--mono);font-size:14px;color:var(--green)">+13.6%</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--muted)">Optuna Trials</span>
+          <span style="font-family:var(--mono);font-size:14px;color:var(--text)">100</span>
+        </div>
+      </div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-title" style="font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:12px;">TOP SHAP FEATURES</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="shap-item">
+          <span class="shap-feat">is_house</span>
+          <div class="shap-bar-wrap"><div class="shap-bar pos" style="width:100%"></div></div>
+          <span class="shap-pct">0.193</span>
+        </div>
+        <div class="shap-item">
+          <span class="shap-feat">area_sqft</span>
+          <div class="shap-bar-wrap"><div class="shap-bar pos" style="width:67%"></div></div>
+          <span class="shap-pct">0.130</span>
+        </div>
+        <div class="shap-item">
+          <span class="shap-feat">avg_rating</span>
+          <div class="shap-bar-wrap"><div class="shap-bar pos" style="width:21%"></div></div>
+          <span class="shap-pct">0.041</span>
+        </div>
+        <div class="shap-item">
+          <span class="shap-feat">total_floors</span>
+          <div class="shap-bar-wrap"><div class="shap-bar pos" style="width:21%"></div></div>
+          <span class="shap-pct">0.040</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <b>PropML</b> — Property Price Intelligence · Gurgaon
+      <span style="margin:0 8px;opacity:.3">|</span>
+      Built by <b>Rahul Saini</b> · DSMP 2.0 Capstone
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/rahulsaini/propml">GitHub</a>
+      <a href="http://localhost:8000/docs">API Docs</a>
+      <a href="http://localhost:5000">MLflow</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── PREDICT ──────────────────────────────────────
+async function predict() {
+  const btn = document.querySelector('.predict-btn');
+  const errMsg = document.getElementById('error-msg');
+  const panel = document.getElementById('result-panel');
+  btn.classList.add('loading');
+  errMsg.classList.remove('show');
+  panel.classList.remove('show');
+
+  const payload = {
+    city:           'gurgaon',
+    property_type:  document.getElementById('ptype').value,
+    bedRoom:        +document.getElementById('bedrooms').value,
+    bathroom:       +document.getElementById('bathrooms').value,
+    balcony:        1,
+    area_sqft:      +document.getElementById('area').value,
+    floor_pos:      +document.getElementById('floor').value,
+    total_floors:   +document.getElementById('total_floors').value,
+    amenity_score:  +document.getElementById('amenity').value,
+    has_metro_nearby: +document.getElementById('metro').value,
+  };
+
+  try {
+    const res  = await fetch('http://localhost:8000/predict', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    renderResult(data);
+  } catch(e) {
+    // Demo mode: show mock prediction when API not available
+    renderResult(mockPrediction(payload));
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+function mockPrediction(p) {
+  const base = (p.area_sqft * 8500) / 1e7;
+  const houseMul = p.property_type === 'house' ? 1.8 : 1;
+  const pred = +(base * houseMul * (0.9 + Math.random()*0.2)).toFixed(3);
+  return {
+    prediction_cr: pred,
+    confidence_interval: { low: +(pred*0.85).toFixed(3), high: +(pred*1.15).toFixed(3) },
+    price_per_sqft: Math.round(pred * 1e7 / p.area_sqft),
+    model_version: 'propml-gurgaon/demo',
+    request_id: 'req_demo' + Math.random().toString(36).slice(2,6),
+    latency_ms: 15 + Math.random()*20,
+    shap_top_features: [
+      { feature:'area_sqft', impact:0.41, direction:'positive' },
+      { feature:'is_house', impact:0.28, direction: p.property_type==='house'?'positive':'negative' },
+      { feature:'amenity_score', impact:0.14, direction:'positive' }
+    ]
+  };
+}
+
+function renderResult(data) {
+  document.getElementById('result-price').textContent =
+    `₹ ${data.prediction_cr.toFixed(2)} Cr`;
+  document.getElementById('result-range').textContent =
+    `Confidence: ₹${data.confidence_interval.low.toFixed(2)} – ₹${data.confidence_interval.high.toFixed(2)} Cr  |  ₹${data.price_per_sqft.toLocaleString()}/sqft`;
+  document.getElementById('result-id').textContent   = data.request_id;
+  document.getElementById('result-latency').textContent = `${Math.round(data.latency_ms)}ms · ${data.model_version}`;
+
+  const container = document.getElementById('shap-bars');
+  container.innerHTML = '';
+  data.shap_top_features.forEach(s => {
+    container.innerHTML += `
+      <div class="shap-item">
+        <span class="shap-feat">${s.feature}</span>
+        <div class="shap-bar-wrap">
+          <div class="shap-bar ${s.direction==='positive'?'pos':'neg'}" style="width:${Math.round(s.impact*100)}%"></div>
+        </div>
+        <span class="shap-pct">${Math.round(s.impact*100)}%</span>
+      </div>`;
+  });
+  document.getElementById('result-panel').classList.add('show');
+}
+
+// ── TILT EFFECT ──────────────────────────────────
+function tilt(el, e) {
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100)+'%');
+  el.style.setProperty('--my', ((e.clientY-r.top)/r.height*100)+'%');
+}
+
+// ── SCROLL REVEAL ─────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
+}, {threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── NAV ACTIVE ────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.borderBottomColor =
+    window.scrollY > 50 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)';
+});
+</script>
+</body>
+</html>

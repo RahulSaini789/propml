@@ -1,10 +1,10 @@
 {
-  "mape": 21.0268,
-  "r2": 0.8493,
-  "rmse_log": 0.2069,
-  "median_error_cr": 0.1636,
-  "run_id": "0dc53826ad61438f8a2d5074a84da9b5",
+  "mape": 20.985,
+  "r2": 0.8502,
+  "rmse_log": 0.2062,
+  "median_error_cr": 0.1655,
+  "run_id": "306c280e390e4a83a9ca77db505bb986",
   "n_features": 26,
   "n_train_rows": 3417,
-  "improvement_over_baseline": 13.6295
+  "improvement_over_baseline": 13.6713
 }

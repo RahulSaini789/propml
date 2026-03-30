@@ -28,6 +28,7 @@ import time
 import uuid
 import json
 import logging
+import os  # 🛠️ FIXED: Added os module for environment variables
 from pathlib import Path
 from datetime import datetime
 
@@ -39,7 +40,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Config ──
-MLFLOW_URI     = "http://localhost:5000"
+# 🛠️ FIXED: Read from Docker environment variable, fallback to localhost if running outside Docker
+MLFLOW_URI     = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MODELS_DIR     = Path("models/current")
 FEATURES_DIR   = Path("data/features")
 
