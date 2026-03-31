@@ -106,7 +106,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this to your frontend domains
+    # Yahan humne security tight kar di hai:
+    allow_origins=[
+        "https://RahulSaini789.github.io",  # Aapki Live Website
+        "http://localhost:5500",            # Local testing ke liye
+        "http://127.0.0.1:5500",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
