@@ -4,6 +4,7 @@ numpy
 scikit-learn
 xgboost
 lightgbm
+huggingface-hub==0.21.4
 
 # Data Validation & Versioning
 dvc
