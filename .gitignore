@@ -6,6 +6,7 @@
 # 🧠 Trained Models (The Big Brains)
 *.pkl
 *.joblib
+*.npz
 
 # 🗑️ Python Junk (The Clutter)
 __pycache__/
@@ -27,3 +28,8 @@ mlruns/
 
 # DVC cache (tracked by DVC, not Git)
 .dvc/cache
+
+# Large model files (exceeds GitHub 100MB limit)
+models/recommender_matrix.npz
+models/current/
+node_modules/
